@@ -1,0 +1,16 @@
+Dec 2016
+Added to `/etc/rc.local` to turn off the ACT led for system operations:
+
+```
+# Set the Pi Zero ACT LED trigger to 'none'.
+echo none | sudo tee /sys/class/leds/led0/trigger
+
+# Turn off the Pi Zero ACT LED.
+echo 1 | sudo tee /sys/class/leds/led0/brightness
+
+nohup su pi -c 'python /home/pi/lapse_project/lapse.py &'
+```
+
+The nohup command runs the timelapse script after the Pi has booted.
+
+Other experiment scripts are just to experiment with python and the Pi.
