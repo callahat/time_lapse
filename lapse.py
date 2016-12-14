@@ -77,7 +77,7 @@ if GPIO.input(FIVE) == SWITCH_ON:
 
 # Invert the modifier
 if GPIO.input(INVERSE) == SWITCH_ON:
-    MODIFIER = 1 / MODIFIER
+    MODIFIER = 1.0 / MODIFIER
 
 # Sleep more or less than the base interval
 SECONDS_TO_SLEEP *= MODIFIER
