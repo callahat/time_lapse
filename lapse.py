@@ -4,7 +4,9 @@ import os
 from picamera import PiCamera
 from time import sleep
 
-import RPi.GPIO as GPIO
+from pin_config import *
+
+#import RPi.GPIO as GPIO
 
 c = PiCamera()
 #c.rotation = 90
@@ -12,48 +14,10 @@ c = PiCamera()
 c.resolution = (3280,2464)
 #c.resolution = (1700,1280)
 
-
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(47, GPIO.OUT)
-
-# BCM pins, connected to the 8 switch DIP switch
-# Below are the switches in order 1-8, and which BCM pin
-# they connect to
-MINUTE  = 23
-HOUR    = 24
-DAY     = 25
-
-INVERSE = 16 
-
-TWO_1   = 17
-TWO_2   = 27
-THREE   = 22
-FIVE    =  6
-
-# GPIO for the start button
-START_BTN = 26
-
-# ACT led on/off values
-ACT_OFF = 1
-ACT_ON  = 0
-
-SWITCH_ON  = 1
-SWITCH_OFF = 0
-
-# Setup GPIO
-GPIO.setup(START_BTN, GPIO.IN, GPIO.PUD_DOWN)
-GPIO.setup(MINUTE, GPIO.IN, GPIO.PUD_DOWN)
-GPIO.setup(HOUR, GPIO.IN, GPIO.PUD_DOWN)
-GPIO.setup(DAY, GPIO.IN, GPIO.PUD_DOWN)
-GPIO.setup(INVERSE, GPIO.IN, GPIO.PUD_DOWN)
-GPIO.setup(TWO_1, GPIO.IN, GPIO.PUD_DOWN)
-GPIO.setup(TWO_2, GPIO.IN, GPIO.PUD_DOWN)
-GPIO.setup(THREE, GPIO.IN, GPIO.PUD_DOWN)
-GPIO.setup(FIVE, GPIO.IN, GPIO.PUD_DOWN)
-
-
 print("Waiting starting button...")
 GPIO.wait_for_edge(26,GPIO.RISING)
+
+print("Start detected")
 
 START_TIME = time.strftime("%Y-%m-%d_%H-%M-%S")
 IMAGE_FOLDER = '/home/pi/lapse_project/lapse_{:s}'.format(START_TIME)
@@ -64,7 +28,7 @@ if GPIO.input(DAY) == SWITCH_ON:
     SECONDS_TO_SLEEP = 24 * 60 * 60
 elif GPIO.input(HOUR) == SWITCH_ON:
     SECONDS_TO_SLEEP = 60 * 60
-elif GPIO.input(MINUTE) == SWITCH_ON:
+else: # GPIO.input(MINUTE) == SWITCH_ON:
     SECONDS_TO_SLEEP = 60
 
 MODIFIER = 1
@@ -86,12 +50,20 @@ if GPIO.input(INVERSE) == SWITCH_ON:
 # Sleep more or less than the base interval
 SECONDS_TO_SLEEP *= MODIFIER
 
-print("Start detected")
+if GPIO.input(REUSE_FOLDER):
+    print("Reusing previous image save directory")
+    lapse_folders = []
+    for f in os.listdir('/home/pi/lapse_project/'):
+        if os.path.isdir(f) and 'lapse' in f:
+            lapse_folders.append(f)
+    lapse_folders.sort()
+    if len(lapse_folders) > 0:
+        IMAGE_FOLDER = lapse_folders[-1]
+
 print("image save directory:")
-print(START_TIME)
+print(IMAGE_FOLDER)
 
 print("Sleeping {:.0f} seconds between captures".format(SECONDS_TO_SLEEP))
-
 
 if not os.path.exists(IMAGE_FOLDER):
     os.makedirs(IMAGE_FOLDER)
