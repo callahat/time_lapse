@@ -9,6 +9,10 @@ import RPi.GPIO as GPIO
 c = PiCamera()
 #c.rotation = 90
 
+c.resolution = (3280,2464)
+#c.resolution = (1700,1280)
+
+
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(47, GPIO.OUT)
 

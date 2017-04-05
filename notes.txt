@@ -8,7 +8,7 @@ echo none | sudo tee /sys/class/leds/led0/trigger
 # Turn off the Pi Zero ACT LED.
 echo 1 | sudo tee /sys/class/leds/led0/brightness
 
-nohup su pi -c 'python /home/pi/lapse_project/lapse.py &'
+nohup su pi -c 'python -u /home/pi/lapse_project/lapse.py &'
 ```
 
 The nohup command runs the timelapse script after the Pi has booted.
