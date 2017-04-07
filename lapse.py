@@ -5,6 +5,7 @@ from picamera import PiCamera
 from time import sleep
 
 from pin_config import *
+from reuse_folder import imageFolder
 
 #import RPi.GPIO as GPIO
 
@@ -14,13 +15,21 @@ c = PiCamera()
 c.resolution = (3280,2464)
 #c.resolution = (1700,1280)
 
-print("Waiting starting button...")
-GPIO.wait_for_edge(26,GPIO.RISING)
+sleep(1)
+
+if GPIO.input(26) == SWITCH_ON:
+    print("Detected start switch")
+else:
+    print("Waiting starting button...")
+    GPIO.wait_for_edge(26,GPIO.RISING)
 
 print("Start detected")
 
-START_TIME = time.strftime("%Y-%m-%d_%H-%M-%S")
-IMAGE_FOLDER = '/home/pi/lapse_project/lapse_{:s}'.format(START_TIME)
+IMAGE_FOLDER = imageFolder(GPIO.input(REUSE_FOLDER))
+
+if not os.path.exists(IMAGE_FOLDER):
+    print("Image folder not found, creating it.")
+    os.makedirs(IMAGE_FOLDER)
 
 # Base interval between pictures,
 # One day, one hour, one minute (in seconds)
@@ -50,23 +59,7 @@ if GPIO.input(INVERSE) == SWITCH_ON:
 # Sleep more or less than the base interval
 SECONDS_TO_SLEEP *= MODIFIER
 
-if GPIO.input(REUSE_FOLDER):
-    print("Reusing previous image save directory")
-    lapse_folders = []
-    for f in os.listdir('/home/pi/lapse_project/'):
-        if os.path.isdir(f) and 'lapse' in f:
-            lapse_folders.append(f)
-    lapse_folders.sort()
-    if len(lapse_folders) > 0:
-        IMAGE_FOLDER = lapse_folders[-1]
-
-print("image save directory:")
-print(IMAGE_FOLDER)
-
 print("Sleeping {:.0f} seconds between captures".format(SECONDS_TO_SLEEP))
-
-if not os.path.exists(IMAGE_FOLDER):
-    os.makedirs(IMAGE_FOLDER)
 
 while(True):
     sleep_time = SECONDS_TO_SLEEP - time.time() % SECONDS_TO_SLEEP
