@@ -14,3 +14,12 @@ nohup su pi -c 'python -u /home/pi/lapse_project/lapse.py &'
 The nohup command runs the timelapse script after the Pi has booted.
 
 Other experiment scripts are just to experiment with python and the Pi.
+
+
+# Make a file with all the image filenames
+# This one gets all the images from the top of the hour
+ls -1v lapse_<timestamp>/*00-00* | grep jpg > files-4-3-2017.txt
+
+# Stich the photos together with mencoder
+# scale should be the size of the images
+time mencoder -nosound -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=21600000 -o out24fpshourly-4-3-2017.avi -mf type=jpeg:fps=24 mf://@files-4-3-2017.txt -vf scale=3280:2464
